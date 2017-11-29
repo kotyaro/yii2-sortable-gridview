@@ -7,14 +7,15 @@
 	    sortingFailText: 'Fail to sort',
 	    csrfTokenName: '',
 	    csrfToken: '',
+            callback: null
 	};
-	
+
 	$.extend({}, defaultOptions, options);
-	
+
 	$('body').append('<div class="modal fade" id="' + options.id + '-sorting-modal" tabindex="-1" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-body">' + options.sortingPromptText + '</div></div></div></div>');
-	
+
 	var regex = /items\[\]\_(\d+)/;
-	
+
 	$('#' + options.id + ' .sortable-grid-view tbody').sortable({
 	    update : function () {
 		$('#' + options.id + '-sorting-modal').modal('show');
@@ -24,16 +25,16 @@
 		var currentRecordNo = 0;
 		var successRecordNo = 0;
 		var data = '';
-		
+
 		if(length > 0){
 		    for(var i=0; i<length; i++){
 			var itemID = regex.exec(serial[i]);
 			data = data + 'items[' + i + ']=' + itemID[1] + '&';
 			currentRecordNo++;
-			
+
 			if(currentRecordNo == 500 || i == (length-1)){
 			    data =  data + options.csrfTokenName + '=' + options.csrfToken;
-			    
+
 			    (function(currentRecordNo){
 				$.ajax({
 				    'url': options.action,
@@ -48,18 +49,19 @@
 				    }
 				});
 			    })(currentRecordNo);
-			    
+
 			    currentRecordNo = 0;
 			    data = '';
 			}
 		    }
 		}
-		
+
 		function checkSuccess(count){
 		    successRecordNo += count;
-		    
+
 		    if(successRecordNo >= length){
 			$('#' + options.id + '-sorting-modal').modal('hide');
+                        options.callback && eval(options.callback);
 		    }
 		}
 	    },
